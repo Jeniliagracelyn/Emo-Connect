@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection Chatbot</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            height: 100vh;
+            margin: 0;
+        }
+        #container {
+            display: flex;
+            width: 80%;
+            height: 80%;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #video-container {
+            flex: 1;
+            background-color: #000;
+        }
+        #video-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        #chatbox {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+        }
+        #chatbox p {
+            margin: 15px 0; /* Increased margin for spacing between messages */
+        }
+        #chatbox .user {
+            text-align: right;
+        }
+        #chatbox .bot {
+            text-align: left;
+        }
+        #chatbox .label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        #chat-input {
+            display: flex;
+            margin-top: 10px;
+        }
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #chat-input button {
+            margin-left: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="video-container">
+            <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+        </div>
+        <div id="chat-container">
+            <div id="chatbox"></div>
+            <div id="chat-input">
+                <input type="text" id="message" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Function to send a message to the chatbot
+    function sendMessage() {
+        const message = document.getElementById("message").value;
+        if (!message) return;
+        
+        const chatbox = document.getElementById("chatbox");
+
+        // User message with label "You"
+        const userMessage = document.createElement("p");
+        userMessage.innerHTML = `<span class="label">You:</span> ${message}`;
+        userMessage.classList.add("user");
+        chatbox.appendChild(userMessage);
+
+        fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Bot message with label "Chatbot"
+            const botMessage = document.createElement("p");
+            botMessage.innerHTML = `<span class="label">Chatbot:</span> ${data.response}`;
+            botMessage.classList.add("bot");
+            chatbox.appendChild(botMessage);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        });
+
+        document.getElementById("message").value = "";
+    }
+
+    // Function to initiate the conversation when the page loads
+    function initiateChat() {
+        const chatbox = document.getElementById("chatbox");
+        fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: "" }) // Send an empty message to start the chat
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Bot's first message with label "Chatbot"
+            const botMessage = document.createElement("p");
+            botMessage.innerHTML = `<span class="label">Chatbot:</span> ${data.response}`;
+            botMessage.classList.add("bot");
+            chatbox.appendChild(botMessage);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        });
+    }
+
+    // Call initiateChat when the page loads
+    window.onload = initiateChat;
+</script>
+
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+Flask
+numpy
+opencv-python
+keras
+tensorflow
+cohere
+
+
